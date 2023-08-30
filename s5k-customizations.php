@@ -6,34 +6,34 @@
  * Author:          w33zy
  * Author URI:      https://wzymedia.com
  * Text Domain:     wzy-media
- * Version:         1.0.0
+ * Version:         1.1.0
  *
  * @package         S5K_Customizations
  */
 class S5K_Customizations {
 
 	public static array $variation_matrix = [
-		220 => [ 'XS', 'Pink' ],
-		221 => [ 'XS', 'Multicolour' ],
+		218 => [ 'XXL', '2023 Race T-shirt Pink Print' ],
+		219 => [ 'XXL', '2023 Race T-shirt Multicolour Print' ],
 
-		222 => [ 'S', 'Pink' ],
-		223 => [ 'S', 'Multicolour' ],
+		220 => [ 'XS', '2023 Race T-shirt Pink Print' ],
+		221 => [ 'XS', '2023 Race T-shirt Multicolour Print' ],
 
-		224 => [ 'M', 'Pink' ],
-		225 => [ 'M', 'Multicolour' ],
+		222 => [ 'S', '2023 Race T-shirt Pink Print' ],
+		223 => [ 'S', '2023 Race T-shirt Multicolour Print' ],
 
-		226 => [ 'L', 'Pink' ],
-		227 => [ 'L', 'Multicolour' ],
+		224 => [ 'M', '2023 Race T-shirt Pink Print' ],
+		225 => [ 'M', '2023 Race T-shirt Multicolour Print' ],
 
-		228 => [ 'XL', 'Pink' ],
-		229 => [ 'XL', 'Multicolour' ],
+		226 => [ 'L', '2023 Race T-shirt Pink Print' ],
+		227 => [ 'L', '2023 Race T-shirt Multicolour Print' ],
 
-		230 => [ 'XXL', 'Pink' ],
-		231 => [ 'XXL', 'Multicolour' ],
+		228 => [ 'XL', '2023 Race T-shirt Pink Print' ],
+		229 => [ 'XL', '2023 Race T-shirt Multicolour Print' ],
 
-		218 => [ 'XXL', 'Pink' ],
-		219 => [ 'XXL', 'Multicolour' ],
-	];
+		230 => [ 'XXL', '2023 Race T-shirt Pink Print' ],
+		231 => [ 'XXL', '2023 Race T-shirt Multicolour Print' ],
+    ];
 
 	public static function start(): void {
 
@@ -64,6 +64,11 @@ class S5K_Customizations {
 		add_action( 'woocommerce_checkout_create_order', array( __CLASS__, 'update_tshirt_count' ), 99, 2 );
 	}
 
+	/**
+     * Insert the script that checks the number of tickets available
+     *
+	 * @return void
+	 */
 	public static function insert_single_product_script(): void { ?>
 			<script>
 				document.addEventListener('DOMContentLoaded', function() {
@@ -111,6 +116,11 @@ class S5K_Customizations {
 	<?php 
 	}
 
+	/**
+     * Insert the ticket count element, used to display the number of tickets available on errors
+     *
+	 * @return void
+	 */
 	public static function insert_ticket_count(): void {
 		if ( is_singular( 'product' ) ) { ?>
 			<div class="s5k-ticket-exceeded"></div>
@@ -119,9 +129,16 @@ class S5K_Customizations {
 	}
 
 	/**
+     * Update the number of tickets available
+     *
+     * @param  \WC_Order  $order  The order object
+	 * @param  array      $data   The data from the checkout form
+	 *
 	 * @throws \Exception
+     *
+     * @return void
 	 */
-	public static function update_ticket_count( WC_Order $order, $data ): void {
+	public static function update_ticket_count( \WC_Order $order, array $data ): void {
 		$counts = array_count_values( self::get_field_from_order( $order, 'gender' ) );
 		$count  = $counts['Male'] ?? 0;
 
@@ -160,10 +177,26 @@ class S5K_Customizations {
 		}
 	}
 
-	public static function update_tshirt_count( $order, $data ): void {
-		ray( [ 'order' => $order, 'data' => $data, 'POST' => $_POST ] )->blue();
-		ray( $order->get_items() )->green();
+	/**
+     * Decrease the stock count for the selected t-shirt size and design
+     *
+	 * @param  \WC_Order  $order
+	 * @param  array      $data
+	 *
+	 * @return void
+	 */
+	public static function update_tshirt_count( WC_Order $order, array $data ): void {
+        $sizes    = self::get_field_from_order( $order, 'tshirtsize' );
+        $designs  = self::get_field_from_order( $order, 'shirtdesign' );
+        $combined = self::combine_arrays_to_associative( $sizes, $designs );
 
+		foreach ( self::$variation_matrix as $key => $value ) {
+			foreach ( $combined as $selection ) {
+				if ( serialize( $value ) === serialize( $selection ) ) {
+					wc_update_product_stock( $key, 1, 'decrease' );
+				}
+			}
+		}
 	}
 
 	private static function get_field_from_order( WC_Order $order, string $field ): array {
@@ -195,6 +228,19 @@ class S5K_Customizations {
 		}
 
 		return null;
+	}
+
+	private static function combine_arrays_to_associative( array $keys, array $values ): array {
+		$new_array = [];
+
+		for ( $i = 0, $iMax = count( $keys ); $i < $iMax; $i++ ) {
+			$key = $keys[$i];
+			$value = $values[$i];
+			// $new_array[$key] = $value;
+			$new_array[] = [ $key, $value ];
+		}
+
+		return $new_array;
 	}
 
 }
