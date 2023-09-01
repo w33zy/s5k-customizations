@@ -49,6 +49,7 @@ class S5K_Customizations {
 
 	// On plugin activation store the initial number of tickets available
 	public static function activate(): void {
+		global $registration_codes;
 		if ( false === get_option( '_s5k_male_tickets_available' ) ) {
 			update_option( '_s5k_male_tickets_available', 500 );
 		}
@@ -77,6 +78,7 @@ class S5K_Customizations {
         // Insert a JS script on the checkout page
 		add_filter( 'woocommerce_after_checkout_form', [ __CLASS__, 'insert_checkout_page_script' ], 99 );
 
+        // Show the cheque payment method only if the cart contains a product from the "Group Registration" category
 		add_filter( 'woocommerce_available_payment_gateways', [ __CLASS__, 'show_cheque_payment_checkout_page' ], 99 );
     }
 
@@ -453,6 +455,10 @@ class S5K_Customizations {
 	public static function show_cheque_payment_checkout_page( array $available_gateways ): array {
         $group      = false;
         $categories = [ 'group-registration' ];
+
+        if ( is_admin() ) {
+            return $available_gateways;
+        }
 
 		foreach ( WC()->cart->get_cart() as $key => $values ) {
 			$product = $values['data'];
