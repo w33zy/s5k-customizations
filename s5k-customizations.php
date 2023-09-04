@@ -84,6 +84,8 @@ class S5K_Customizations {
 
 	public static function add_actions(): void {
 
+        add_action( 'wp_enqueue_scripts', [ __CLASS__, 'enqueue_scripts' ] );
+
         // Insert a JS script on the single product page
 		add_action( 'woocommerce_after_single_product', [ __CLASS__, 'insert_single_product_script' ], 99 );
 		add_action( 'woocommerce_after_single_product', [ __CLASS__, 'get_tshirt_variation_stock' ], 100 );
@@ -102,7 +104,26 @@ class S5K_Customizations {
 
         // Add the registration code to the order emails
 		add_action( 'woocommerce_email_order_meta', [ __CLASS__, 'add_registration_code_to_emails' ], 99, 3 );
+
+		add_action( 'wp_ajax_nopriv_fetch_product_variations_stock', [ __CLASS__, 'fetch_product_variations_stock' ] );
+		add_action( 'wp_ajax_fetch_product_variations_stock', [ __CLASS__, 'fetch_product_variations_stock' ] );
 	}
+
+    public static function enqueue_scripts(): void {
+	    $data = [
+		    'ajaxUrl'   => admin_url( 'admin-ajax.php' ),
+		    'nonce'     => wp_create_nonce( 'fetch_product_variations_stock' ),
+		    'productID' => 155,
+	    ];
+
+        if ( is_singular( 'product' ) ) {
+            wp_enqueue_script( 's5k-customizations', plugin_dir_url( __FILE__ ) . 'assets/js/s5k-customizations.js', [ 'jquery' ], '1.0.0', true );
+	        wp_add_inline_script(
+		        's5k-customizations',
+		        'window.s5k = window.s5k || {}; s5k.wpData = ' . wp_json_encode(  $data )
+	        );
+        }
+    }
 
 	/**
      * Prevents 2 products from the "Group Registration" category from being added to the cart
@@ -202,35 +223,7 @@ class S5K_Customizations {
 	}
 
 	public static function get_tshirt_variation_stock(): void { ?>
-        <script>
-          function hasAncestorWithClass(element, className) {
-            let currentElement = element.parentElement;
 
-            while (currentElement !== null) {
-              if (currentElement.classList.contains(className)) {
-                console.log(currentElement.classList)
-                return true;
-              }
-              currentElement = currentElement.parentElement;
-            }
-
-            return false;
-          }
-
-          document.addEventListener('DOMContentLoaded', function() {
-            // Add an event listener to the document for change events on elements with class ".rnInputPrice"
-            document.addEventListener('change', function(e) {
-              if (e.target && e.target.classList.contains('rnInputPrice')) {
-                hasAncestorWithClass(e.target, 'rndropdown')
-                const selectedOption = e.target.options[e.target.selectedIndex];
-                const selectedText = selectedOption.textContent;
-
-                console.log(`Selected text: ${selectedText}, Selected value: ${selectedOption.value}`);
-              }
-            });
-
-          });
-        </script>
     <?php }
 
 	/**
@@ -431,13 +424,18 @@ class S5K_Customizations {
 		}
     }
 
+	public static function fetch_product_variations_stock() {
+        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'fetch_product_variations_stock' ) ) {
+            wp_send_json_error( 'Invalid nonce' );
+        }
+
+        wp_send_json_success( self::get_product_variations_stock( (int) $_POST['product_ID'] ) ) ;
+    }
+
 	public static function insert_checkout_page_script(): void { ?>
         <script>
           (function($) {
             console.log('Checkout page script loaded', $);
-
-            // Disable the registration code field
-            // $('#registration_code').prop('disabled', true);
           })(jQuery)
         </script>
 
@@ -568,7 +566,7 @@ class S5K_Customizations {
 		return $new_array;
 	}
 
-	private static function get_product_variations_stock( $product_id ) {
+	public static function get_product_variations_stock( $product_id, $simple = true ): array {
 		$product = wc_get_product( $product_id );
 
 		if ( ! $product || ! $product->is_type( 'variable' ) ) {
@@ -583,11 +581,15 @@ class S5K_Customizations {
 			$variation_obj  = wc_get_product( $variation_id );
 			$stock_quantity = $variation_obj->get_stock_quantity();
 
-			$variations_stock[] = [
-				'variation_id'   => $variation_id,
-				'attributes'     => $variation['attributes'],
-				'stock_quantity' => $stock_quantity,
-			];
+            if ( $simple ) {
+	            $variations_stock[ $variation['attributes']['attribute_pa_size'] . ' - ' . $variation['attributes']['attribute_pa_design'] ] = $stock_quantity;
+            } else {
+	            $variations_stock[] = [
+		            'variation_id'   => $variation_id,
+		            'attributes'     => $variation['attributes'],
+		            'stock_quantity' => $stock_quantity,
+	            ];
+            }
 		}
 
 		return $variations_stock;
