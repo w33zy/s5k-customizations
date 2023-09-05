@@ -114,10 +114,11 @@ class S5K_Customizations {
 		    'ajaxUrl'   => admin_url( 'admin-ajax.php' ),
 		    'nonce'     => wp_create_nonce( 'fetch_product_variations_stock' ),
 		    'productID' => 155,
+            'variationsStock' => self::get_product_variations_stock( 155 ),
 	    ];
 
         if ( is_singular( 'product' ) ) {
-            wp_enqueue_script( 's5k-customizations', plugin_dir_url( __FILE__ ) . 'assets/js/s5k-customizations.js', [ 'jquery' ], '1.0.0', true );
+            wp_enqueue_script( 's5k-customizations', plugin_dir_url( __FILE__ ) . 'assets/js/s5k-customizations3.js', [ 'jquery' ], '1.0.0', true );
 	        wp_add_inline_script(
 		        's5k-customizations',
 		        'window.s5k = window.s5k || {}; s5k.wpData = ' . wp_json_encode(  $data )
@@ -582,7 +583,7 @@ class S5K_Customizations {
 			$stock_quantity = $variation_obj->get_stock_quantity();
 
             if ( $simple ) {
-	            $variations_stock[ $variation['attributes']['attribute_pa_size'] . ' - ' . $variation['attributes']['attribute_pa_design'] ] = $stock_quantity;
+	            $variations_stock[ $variation['attributes']['attribute_pa_size'] . '-' . $variation['attributes']['attribute_pa_design'] ] = $stock_quantity;
             } else {
 	            $variations_stock[] = [
 		            'variation_id'   => $variation_id,
