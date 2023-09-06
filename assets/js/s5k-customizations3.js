@@ -88,7 +88,7 @@ function getExceededStockVariations(userSelectionsCount, variationsStock) {
 
   for (const [selection, count] of Object.entries(userSelectionsCount)) {
     for (const [variation, stock] of Object.entries(variationsStock)){
-      if (count > stock) {
+      if ( (selection === variation) && count > stock) {
         stockExceeded.push(variation);
       }
     }
@@ -197,8 +197,8 @@ document.addEventListener('DOMContentLoaded', function() {
       normalizedSelectedOptions = normalizeUserSelections(selectedOptions);
       userSelectionsCount = countUserSelections(normalizedSelectedOptions);
 
-      // console.log('userSelectionsCount: ', userSelectionsCount);
-      // console.log('variationsStock: ', variationsStock);
+      console.log('userSelectionsCount: ', userSelectionsCount);
+      console.log('variationsStock: ', variationsStock);
       // console.log(printExceededStockMessage(userSelectionsCount, variationsStock, variationNames));
 
       stockExceeded = getExceededStockVariations(userSelectionsCount, variationsStock);
