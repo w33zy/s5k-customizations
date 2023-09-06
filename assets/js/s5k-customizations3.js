@@ -40,8 +40,8 @@ function printExceededStockMessage(userSelectionsCount, availableStock, variatio
       const stockCount = availableStock[key];
 
       if (userCount > stockCount) {
-        const exceededAmount = userCount - stockCount;
-        exceededStockArray.push({ key, exceededAmount });
+        // const exceededAmount = userCount - stockCount;
+        exceededStockArray.push({ key, userCount });
       }
     }
   }
@@ -51,7 +51,7 @@ function printExceededStockMessage(userSelectionsCount, availableStock, variatio
     const variationKey = keyParts.slice(1).join('-'); // Remove characters up to the first hyphen
     const variationName = variationNames[variationKey];
 
-    return `You have selected ${item.exceededAmount} ${variationName}(s) but there are ${availableStock[item.key]} are available.`;
+    return `You have selected ${item.userCount} ${variationName}(s) but there are ${availableStock[item.key]} available.`;
   });
 
   return exceededStockMessages;
@@ -197,8 +197,8 @@ document.addEventListener('DOMContentLoaded', function() {
       normalizedSelectedOptions = normalizeUserSelections(selectedOptions);
       userSelectionsCount = countUserSelections(normalizedSelectedOptions);
 
-      console.log('userSelectionsCount: ', userSelectionsCount);
-      console.log('variationsStock: ', variationsStock);
+      // console.log('userSelectionsCount: ', userSelectionsCount);
+      // console.log('variationsStock: ', variationsStock);
       // console.log(printExceededStockMessage(userSelectionsCount, variationsStock, variationNames));
 
       stockExceeded = getExceededStockVariations(userSelectionsCount, variationsStock);
@@ -209,8 +209,19 @@ document.addEventListener('DOMContentLoaded', function() {
           const repeater = document.querySelector(`.rnRepeaterItem[data-index="${index}"]`);
 
           if (repeater) {
-            repeater.style.border = '2px solid red';
-            repeater.style.padding = '1rem';
+            const selectFields = repeater.querySelectorAll('select');
+            console.log('selectFields: ', selectFields);
+            let count = 0;
+            for (const selectField of selectFields) {
+              count++;
+              if (count === 1) continue; // Skip the first select field as its the gender field
+
+              selectField.parentElement.style.outline = '2px solid red';
+              selectField.parentElement.style.padding = '10px';
+              selectField.parentElement.style.borderRadius = '4px';
+
+
+            }
           }
         }
 

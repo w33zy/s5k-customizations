@@ -222,7 +222,7 @@ class S5K_Customizations {
 								}
 							});
 
-							console.log('Selected male tickets: ', smt);
+							console.log('SMT: ', smt);
 
 							if (smt > mta) {
 								e.preventDefault();
