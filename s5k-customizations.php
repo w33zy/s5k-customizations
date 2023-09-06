@@ -12,27 +12,44 @@
  */
 class S5K_Customizations {
 
+	public static array $variation_names = [
+		"xs-white-unisex-for-my-t-shirt"              => 'XS, White Unisex "For My" T-shirt',
+		"xs-white-unisex-multicolour-print-t-shirt"   => 'XS, White Unisex Multicolour Print T-shirt',
+		"s-white-unisex-for-my-t-shirt"               => 'S, White Unisex "For My" T-shirt',
+		"s-white-unisex-multicolour-print-t-shirt"    => 'S, White Unisex Multicolour Print T-shirt',
+		"m-white-unisex-for-my-t-shirt"               => 'M, White Unisex "For My" T-shirt',
+		"m-white-unisex-multicolour-print-t-shirt"    => 'M, White Unisex Multicolour Print T-shirt',
+		"l-white-unisex-for-my-t-shirt"               => 'L, White Unisex "For My" T-shirt',
+		"l-white-unisex-multicolour-print-t-shirt"    => 'L, White Unisex Multicolour Print T-shirt',
+		"xl-white-unisex-for-my-t-shirt"              => 'XL, White Unisex "For My" T-shirt',
+		"xl-white-unisex-multicolour-print-t-shirt"   => 'XL, White Unisex Multicolour Print T-shirt',
+		"xxl-white-unisex-for-my-t-shirt"             => 'XXL, White Unisex "For My" T-shirt',
+		"xxl-white-unisex-multicolour-print-t-shirt"  => 'XXL, White Unisex Multicolour Print T-shirt',
+		"xxxl-white-unisex-for-my-t-shirt"            => 'XXXL, White Unisex "For My" T-shirt',
+		"xxxl-white-unisex-multicolour-print-t-shirt" => 'XXXL, White Unisex Multicolour Print T-shirt',
+	];
+
 	public static array $variation_matrix = [
-		218 => [ 'XXL', '2023 Race T-shirt Pink Print' ],
-		219 => [ 'XXL', '2023 Race T-shirt Multicolour Print' ],
+		218 => [ 'XXL', 'White Unisex "For My" T-shirt' ],
+		219 => [ 'XXL', 'White Unisex Multicolour Print T-shirt' ],
 
-		220 => [ 'XS', '2023 Race T-shirt Pink Print' ],
-		221 => [ 'XS', '2023 Race T-shirt Multicolour Print' ],
+		220 => [ 'XS', 'White Unisex "For My" T-shirt' ],
+		221 => [ 'XS', 'White Unisex Multicolour Print T-shirt' ],
 
-		222 => [ 'S', '2023 Race T-shirt Pink Print' ],
-		223 => [ 'S', '2023 Race T-shirt Multicolour Print' ],
+		222 => [ 'S', 'White Unisex "For My" T-shirt' ],
+		223 => [ 'S', 'White Unisex Multicolour Print T-shirt' ],
 
-		224 => [ 'M', '2023 Race T-shirt Pink Print' ],
-		225 => [ 'M', '2023 Race T-shirt Multicolour Print' ],
+		224 => [ 'M', 'White Unisex "For My" T-shirt' ],
+		225 => [ 'M', 'White Unisex Multicolour Print T-shirt' ],
 
-		226 => [ 'L', '2023 Race T-shirt Pink Print' ],
-		227 => [ 'L', '2023 Race T-shirt Multicolour Print' ],
+		226 => [ 'L', 'White Unisex "For My" T-shirt' ],
+		227 => [ 'L', 'White Unisex Multicolour Print T-shirt' ],
 
-		228 => [ 'XL', '2023 Race T-shirt Pink Print' ],
-		229 => [ 'XL', '2023 Race T-shirt Multicolour Print' ],
+		228 => [ 'XL', 'White Unisex "For My" T-shirt' ],
+		229 => [ 'XL', 'White Unisex Multicolour Print T-shirt' ],
 
-		230 => [ 'XXL', '2023 Race T-shirt Pink Print' ],
-		231 => [ 'XXL', '2023 Race T-shirt Multicolour Print' ],
+		230 => [ 'XXL', 'White Unisex "For My" T-shirt' ],
+		231 => [ 'XXL', 'White Unisex Multicolour Print T-shirt' ],
     ];
 
 	public static function start(): void {
@@ -80,7 +97,15 @@ class S5K_Customizations {
 
         // Show the cheque payment method only if the cart contains a product from the "Group Registration" category
 		add_filter( 'woocommerce_available_payment_gateways', [ __CLASS__, 'show_cheque_payment_checkout_page' ], 99 );
+
+        // Load custom WooCommerce templates from the plugin
+		add_filter( 'woocommerce_template_loader_files', [ __CLASS__, 'get_wc_template_name' ], 99, 2 );
+		add_filter( 'template_include', [ __CLASS__, 'include_template_name' ], 99 );
+		add_filter( 'wc_get_template_part', [ __CLASS__, 'get_template_part' ], 99, 3 );
+		add_filter( 'woocommerce_locate_template', [ __CLASS__, 'locate_template' ], 99, 2 );
     }
+
+
 
 	public static function add_actions(): void {
 
@@ -474,6 +499,59 @@ class S5K_Customizations {
 
         return $available_gateways;
     }
+
+	public static function get_wc_template_name( $templates, $template_name ) {
+		// Capture/cache the $template_name which is a file name like single-product.php
+		wp_cache_set( 's5k_wc_main_template', $template_name ); // cache the template name
+
+		return $templates;
+	}
+
+	public static function include_template_name( $template ) {
+
+		// Get the cached $template_name
+		if ( $template_name = wp_cache_get( 's5k_wc_main_template' ) ) {
+
+			wp_cache_delete( 's5k_wc_main_template' ); // delete the cache
+
+			if ( $file = self::wc_template_file( $template_name ) ) {
+
+				return $file;
+			}
+		}
+
+		return $template;
+	}
+
+	public static function get_template_part( $template, $slug, $name ) {
+
+		$file = self::wc_template_file( "{$slug}-{$name}.php" );
+
+		return $file ?: $template;
+	}
+
+	public static function locate_template( $template, $template_name ) {
+
+		$file = self::wc_template_file( $template_name );
+
+		return $file ?: $template;
+	}
+
+	private static function wc_template_file( string $template_name ): ?string {
+		// Check theme folder first - e.g. wp-content/themes/my-theme/woocommerce.
+		$file = wp_normalize_path( get_stylesheet_directory() . '/woocommerce/templates/' . $template_name );
+		if ( @file_exists( $file ) ) {
+			return $file;
+		}
+
+		// Now check plugin folder - e.g. wp-content/plugins/my-plugin/woocommerce/templates.
+		$file = wp_normalize_path( __DIR__ . '/woocommerce/templates/' . $template_name );
+		if ( @file_exists( $file ) ) {
+			return $file;
+		}
+
+		return null;
+	}
 
 	/**
      * Get the next available registration code

@@ -26,6 +26,38 @@ function getParentElement(element, className) {
   return undefined;
 }
 
+const variationNames = {
+  'white-unisex-for-my-t-shirt': 'White Unisex "For My" T-shirt',
+  'white-unisex-multicolour-print-t-shirt': 'White Unisex Multicolour Print T-shirt',
+}
+
+function printExceededStockMessage(userSelectionsCount, availableStock, variationNames) {
+  const exceededStockArray = [];
+
+  for (const key in userSelectionsCount) {
+    if (userSelectionsCount.hasOwnProperty(key) && availableStock.hasOwnProperty(key)) {
+      const userCount = userSelectionsCount[key];
+      const stockCount = availableStock[key];
+
+      if (userCount > stockCount) {
+        const exceededAmount = userCount - stockCount;
+        exceededStockArray.push({ key, exceededAmount });
+      }
+    }
+  }
+
+  const exceededStockMessages = exceededStockArray.map(item => {
+    const keyParts = item.key.split('-');
+    const variationKey = keyParts.slice(1).join('-'); // Remove characters up to the first hyphen
+    const variationName = variationNames[variationKey];
+
+    return `You have selected ${item.exceededAmount} ${variationName}(s) but there are ${availableStock[item.key]} are available.`;
+  });
+
+  return exceededStockMessages;
+}
+
+
 /**
  *
  * @param {Map<int, string>} map
@@ -156,7 +188,6 @@ document.addEventListener('DOMContentLoaded', function() {
   if (document.querySelector('form.cart')) {
 
     document.querySelector('form.cart').addEventListener('submit', function(e) {
-      e.preventDefault();
 
       let stockExceeded = [];
       const repeaters = document.querySelectorAll('.rnRepeaterItem');
@@ -166,14 +197,13 @@ document.addEventListener('DOMContentLoaded', function() {
       normalizedSelectedOptions = normalizeUserSelections(selectedOptions);
       userSelectionsCount = countUserSelections(normalizedSelectedOptions);
 
-      console.log('User Selection Count: ', userSelectionsCount);
+      // console.log('userSelectionsCount: ', userSelectionsCount);
+      // console.log('variationsStock: ', variationsStock);
+      // console.log(printExceededStockMessage(userSelectionsCount, variationsStock, variationNames));
 
       stockExceeded = getExceededStockVariations(userSelectionsCount, variationsStock);
-      console.log('Stock Exceeded: ', stockExceeded);
 
       if (stockExceeded.length > 0) {
-
-        getOutOfStockIndices(normalizedSelectedOptions, stockExceeded)
 
         for (const index of getOutOfStockIndices(normalizedSelectedOptions, stockExceeded)) {
           const repeater = document.querySelector(`.rnRepeaterItem[data-index="${index}"]`);
@@ -184,6 +214,9 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         }
 
+        const message = printExceededStockMessage(userSelectionsCount, variationsStock, variationNames).join('\n');
+        alert(message + '\n\nPlease select another design or size.');
+        // alert('Some of the highlighted t-shirt selections have exceeded the available stock. Please select another design or size.');
         e.preventDefault();
       } else {
 
