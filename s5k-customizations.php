@@ -93,7 +93,7 @@ class S5K_Customizations {
 		add_filter( 'woocommerce_admin_order_data_after_shipping_address', [ __CLASS__, 'insert_registration_code_on_admin_order_meta' ], 99 );
 
         // Insert a JS script on the checkout page
-		add_filter( 'woocommerce_after_checkout_form', [ __CLASS__, 'insert_checkout_page_script' ], 99 );
+		// add_filter( 'woocommerce_after_checkout_form', [ __CLASS__, 'insert_checkout_page_script' ], 99 );
 
         // Show the cheque payment method only if the cart contains a product from the "Group Registration" category
 		add_filter( 'woocommerce_available_payment_gateways', [ __CLASS__, 'show_cheque_payment_checkout_page' ], 99 );
@@ -450,7 +450,7 @@ class S5K_Customizations {
 		}
     }
 
-	public static function fetch_product_variations_stock() {
+	public static function fetch_product_variations_stock(): void {
         if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'fetch_product_variations_stock' ) ) {
             wp_send_json_error( 'Invalid nonce' );
         }
@@ -481,6 +481,10 @@ class S5K_Customizations {
         $categories = [ 'group-registration' ];
 
         if ( is_admin() ) {
+            return $available_gateways;
+        }
+
+        if ( null === WC()->cart ) {
             return $available_gateways;
         }
 

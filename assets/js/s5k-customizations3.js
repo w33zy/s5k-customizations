@@ -197,10 +197,6 @@ document.addEventListener('DOMContentLoaded', function() {
       normalizedSelectedOptions = normalizeUserSelections(selectedOptions);
       userSelectionsCount = countUserSelections(normalizedSelectedOptions);
 
-      // console.log('userSelectionsCount: ', userSelectionsCount);
-      // console.log('variationsStock: ', variationsStock);
-      // console.log(printExceededStockMessage(userSelectionsCount, variationsStock, variationNames));
-
       stockExceeded = getExceededStockVariations(userSelectionsCount, variationsStock);
 
       if (stockExceeded.length > 0) {
@@ -227,7 +223,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const message = printExceededStockMessage(userSelectionsCount, variationsStock, variationNames).join('\n');
         alert(message + '\n\nPlease select another design or size.');
-        // alert('Some of the highlighted t-shirt selections have exceeded the available stock. Please select another design or size.');
         e.preventDefault();
       } else {
 

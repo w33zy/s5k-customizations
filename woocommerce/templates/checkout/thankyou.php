@@ -49,17 +49,15 @@ defined( 'ABSPATH' ) || exit;
             <?php if ( 'cheque' === $order->get_payment_method() ) : ?>
                 <div class="s5k-group-registration-details">
                 <h3>Registration booking received</h3>
-                <p>Your cheque payment code is <strong><?php echo esc_html( $order->get_meta( '_registration_code' ) ); ?></strong>.</p>
+                <p>Your payment code is <strong><?php echo esc_html( $order->get_meta( '_registration_code' ) ); ?></strong>.</p>
 
-                <p>To confirm your group’s registration, please submit your cheque payment in the full amount listed below (under TOTAL) within the next 5-7 business days. Once your payment is received, your registration will be officially confirmed and, details on your collection date, location and time will be sent via email. Note that email may appear in your Junk or Spam folder.</p>
+                <p>To confirm your group’s registration, please submit your payment in the full amount listed below (under TOTAL) within the next 5-7 business days. Once your payment is received, your registration will be officially confirmed and, details on your collection date, location and time will be sent via email. Note that email may appear in your Junk or Spam folder.</p>
 
                 <h4>Payment details</h4>
                 <p>
                     <strong>Bank name:</strong> Scotiabank Trinidad & Tobago Ltd.<br>
                     <strong>Account name:</strong> Scotiabank Women Against Breast Cancer Fund<br>
-                    <strong>Account number:</strong> 00131247<br>
-                    <strong>Transit:</strong> 74815<br>
-                    <strong>Account type:</strong> Savings<br>
+                    <strong>Account number:</strong> 00131247
                 </p>
 
                 <h4>Have questions or concerns? We’re here to help.</h4>
@@ -105,7 +103,7 @@ defined( 'ABSPATH' ) || exit;
 
                 <?php if ( $order->get_meta( '_registration_code' ) ) : ?>
                     <li class="woocommerce-order-overview__registration-code">
-                        <?php esc_html_e( 'Registration Code:', 'woocommerce' ); ?>
+                        <?php esc_html_e( 'Payment Code:', 'woocommerce' ); ?>
                         <strong><?php echo esc_html( $order->get_meta( '_registration_code' ) ); ?></strong>
                     </li>
                 <?php endif; ?>
