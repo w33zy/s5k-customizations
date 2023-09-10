@@ -103,8 +103,8 @@ class S5K_Customizations {
 		add_filter( 'template_include', [ __CLASS__, 'include_template_name' ], 99 );
 		add_filter( 'wc_get_template_part', [ __CLASS__, 'get_template_part' ], 99, 3 );
 		add_filter( 'woocommerce_locate_template', [ __CLASS__, 'locate_template' ], 99, 2 );
-    }
 
+    }
 
 
 	public static function add_actions(): void {
@@ -605,7 +605,7 @@ class S5K_Customizations {
 	 *
 	 * @return array
 	 */
-	private static function get_field_from_order( WC_Order $order, string $field ): array {
+	public static function get_field_from_order( WC_Order $order, string $field ): array {
 		$result = [];
 
 		foreach ( $order->get_items() as $item ) {
@@ -676,6 +676,53 @@ class S5K_Customizations {
 		}
 
 		return $variations_stock;
+	}
+
+	/**
+     * Get the value of a meta key from the order item meta table
+     *
+	 * @param  int     $order_id
+	 * @param  string  $meta_key
+	 *
+	 * @return mixed|string
+	 */
+	public static function get_order_item_meta_value( int $order_id, string $meta_key ) {
+		global $wpdb;
+
+		// Prepare the SQL query with $wpdb->prepare() to prevent SQL injection
+		$query = $wpdb->prepare(
+			"SELECT meta.meta_value
+            FROM {$wpdb->prefix}woocommerce_order_itemmeta AS meta
+            INNER JOIN {$wpdb->prefix}woocommerce_order_items AS items
+            ON meta.order_item_id = items.order_item_id
+            WHERE items.order_id = %d
+            AND meta.meta_key = %s",
+			$order_id,
+			$meta_key
+		);
+
+		// Use $wpdb->get_var() to retrieve a single value
+		$result = $wpdb->get_var( $query );
+
+		// Return the result
+		return maybe_unserialize( $result );
+	}
+
+	public static function flatten_array( $array ): array {
+		if ( ! is_array( $array ) ) {
+			return [];
+		}
+
+		$result = [];
+		foreach ( $array as $item ) {
+			if ( is_array( $item ) ) {
+				$result = array_merge( $result, self::flatten_array( $item ) );
+			} else {
+				$result[] = $item;
+			}
+		}
+
+		return $result;
 	}
 }
 

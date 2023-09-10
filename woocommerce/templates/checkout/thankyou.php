@@ -43,26 +43,19 @@ defined( 'ABSPATH' ) || exit;
 
 			<p class="woocommerce-notice woocommerce-notice--success woocommerce-thankyou-order-received">
                 <?php //echo apply_filters( 'woocommerce_thankyou_order_received_text', esc_html__( 'Thank you. Your order has been received.', 'woocommerce' ), $order ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-                We have emailed the transaction details to you.
+                Thank you for your support. Your order summary has been emailed to you.
             </p>
             <br>
             <?php if ( 'cheque' === $order->get_payment_method() ) : ?>
                 <div class="s5k-group-registration-details">
                 <h3>Registration booking received</h3>
-                <p>Your payment code is <strong><?php echo esc_html( $order->get_meta( '_registration_code' ) ); ?></strong>.</p>
+                <p>Your registration code is <strong><?php echo esc_html( $order->get_meta( '_registration_code' ) ); ?></strong>.</p>
 
-                <p>To confirm your group’s registration, please submit your payment in the full amount listed below (under TOTAL) within the next 5-7 business days. Once your payment is received, your registration will be officially confirmed and, details on your collection date, location and time will be sent via email. Note that email may appear in your Junk or Spam folder.</p>
+                <p>To confirm your group’s registration, please submit your payment within 2-3 dates business days. Once your payment is received, your registration will be processed. An email confirming your order will be sent to the email you entered previously. Please be sure to check your Junk or Spam folder if you're not seeing the email in your inbox.</p>
 
-                <h4>Payment details</h4>
+                <h5>Have questions or concerns? We’re here to help.</h5>
                 <p>
-                    <strong>Bank name:</strong> Scotiabank Trinidad & Tobago Ltd.<br>
-                    <strong>Account name:</strong> Scotiabank Women Against Breast Cancer Fund<br>
-                    <strong>Account number:</strong> 00131247
-                </p>
-
-                <h4>Have questions or concerns? We’re here to help.</h4>
-                <p>
-                    Send us an email at <a href="mailto:info@registerfor5K.com">info@registerfor5K.com</a> or give us a call on <a href="tel:18687761583"><strong>+1-868-776-1583</strong></a>.
+                    Send us an email at <a href="mailto:info@registerfor5K.com"><strong>info@registerfor5K.com</strong></a> or give us a call on <a href="tel:18687761583"><strong>+1-868-776-1583</strong></a>.
                 </p>
                 <br>
                 <hr>
@@ -103,7 +96,7 @@ defined( 'ABSPATH' ) || exit;
 
                 <?php if ( $order->get_meta( '_registration_code' ) ) : ?>
                     <li class="woocommerce-order-overview__registration-code">
-                        <?php esc_html_e( 'Payment Code:', 'woocommerce' ); ?>
+                        <?php esc_html_e( 'Registration Code:', 'woocommerce' ); ?>
                         <strong><?php echo esc_html( $order->get_meta( '_registration_code' ) ); ?></strong>
                     </li>
                 <?php endif; ?>
