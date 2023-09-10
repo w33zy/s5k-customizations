@@ -128,7 +128,7 @@ class S5K_Customizations {
 		add_action( 'woocommerce_checkout_order_created', [ __CLASS__, 'assign_registration_code' ], 99 );
 
         // Add the registration code to the order emails
-		add_action( 'woocommerce_email_order_meta', [ __CLASS__, 'add_registration_code_to_emails' ], 99, 3 );
+		// add_action( 'woocommerce_email_order_meta', [ __CLASS__, 'add_registration_code_to_emails' ], 99, 3 );
 
 		add_action( 'wp_ajax_nopriv_fetch_product_variations_stock', [ __CLASS__, 'fetch_product_variations_stock' ] );
 		add_action( 'wp_ajax_fetch_product_variations_stock', [ __CLASS__, 'fetch_product_variations_stock' ] );
