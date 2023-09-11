@@ -78,7 +78,6 @@ if ( ! empty( S5K_Customizations::get_field_from_order( $order, 'collection_loca
 
 // Group registration or merch order confirmation EMAIL (other payment method/cheque)
 if ( 'cheque' === $order->get_payment_method()
-     && ! empty( S5K_Customizations::get_field_from_order( $order, 'name_of_company' )[0] )
      && in_array( 'group-registration', S5K_Customizations::flatten_array( $product_terms ), true ) ) {
 
     echo '<p class="s5k-collection-message">Our team will contact you within 48 hours to facilitate payment. Once your payment is received, your registration will be processed</p>';

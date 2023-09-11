@@ -6,7 +6,7 @@
  * Author:          w33zy
  * Author URI:      https://wzymedia.com
  * Text Domain:     wzy-media
- * Version:         1.3.0
+ * Version:         1.9.0
  *
  * @package         S5K_Customizations
  */
@@ -113,7 +113,7 @@ class S5K_Customizations {
 
         // Insert a JS script on the single product page
 		add_action( 'woocommerce_after_single_product', [ __CLASS__, 'insert_single_product_script' ], 99 );
-		add_action( 'woocommerce_after_single_product', [ __CLASS__, 'get_tshirt_variation_stock' ], 100 );
+		// add_action( 'woocommerce_after_single_product', [ __CLASS__, 'get_tshirt_variation_stock' ], 100 );
 
         // Show the number of tickets available on the single product page, if exceeded
 		add_action( 'woocommerce_before_add_to_cart_button', [ __CLASS__, 'insert_ticket_count' ], 99 );
@@ -130,8 +130,10 @@ class S5K_Customizations {
         // Add the registration code to the order emails
 		// add_action( 'woocommerce_email_order_meta', [ __CLASS__, 'add_registration_code_to_emails' ], 99, 3 );
 
-		add_action( 'wp_ajax_nopriv_fetch_product_variations_stock', [ __CLASS__, 'fetch_product_variations_stock' ] );
-		add_action( 'wp_ajax_fetch_product_variations_stock', [ __CLASS__, 'fetch_product_variations_stock' ] );
+		// add_action( 'wp_ajax_nopriv_fetch_product_variations_stock', [ __CLASS__, 'fetch_product_variations_stock' ] );
+		// add_action( 'wp_ajax_fetch_product_variations_stock', [ __CLASS__, 'fetch_product_variations_stock' ] );
+
+		add_action( 'woocommerce_cart_contents', [ __CLASS__, 'add_tt_post_message' ] );
 	}
 
     public static function enqueue_scripts(): void {
@@ -150,6 +152,29 @@ class S5K_Customizations {
 	        );
         }
     }
+
+	public static function add_tt_post_message(): void {
+		$tt_post = false;
+
+		if ( ! empty( WC()->cart ) && WC()->cart->get_cart_contents_count() > 0 ) {
+			foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+				foreach( $cart_item['rn_line_items'] as $line_item ) {
+					if ( 'Street name' === $line_item->Label && ! empty( $line_item->Value ) ) {
+						$tt_post = true;
+						break;
+					}
+				}
+			}
+		}
+
+		?>
+        <tr class="woocommerce-cart-form__cart-item cart_item s5k-tt-post" style="background: #fff;">
+            <td colspan="2" class="tt-post"></td>
+            <td colspan="2" class="tt-post" style="color:#EC111A; font-family:'ScotiaBold',Helvetica,Arial,sans-serif; font-size:20px;">
+				<?php echo $tt_post ? esc_html( 'A TTPost delivery fee of $30 has been added to your cart.' ) : ''; ?>
+            </td>
+        </tr>
+	<?php }
 
 	/**
      * Prevents 2 products from the "Group Registration" category from being added to the cart

@@ -18,21 +18,6 @@
 defined( 'ABSPATH' ) || exit;
 
 do_action( 'woocommerce_before_cart' );
-
-$tt_post = false;
-
-add_filter(
-        'woo_extra_products_display_text_for_cart',
-    static function ( $items, $field, $includeLabel, $fieldOptions ) use ( &$tt_post ) {
-        if ( ! empty( $field->Label ) && ( 'Street name' === $field->Label ) && ! empty( $field->Value ) ) {
-            $tt_post = true;
-        }
-
-	    return $items;
-    },
-        99,
-        4
-);
 ?>
 
 <form class="woocommerce-cart-form s5k-cart-form" action="<?php echo esc_url( wc_get_cart_url() ); ?>" method="post">
@@ -163,12 +148,6 @@ add_filter(
 							?>
 						</td>
 					</tr>
-                    <tr class="woocommerce-cart-form__cart-item cart_item s5k-tt-post" style="background: #fff;">
-                        <td colspan="2" class="tt-post"></td>
-                        <td colspan="2" class="tt-post" style="color: #EC111A;font-weight: bold;">
-                            <?php echo $tt_post ? 'A TTPost delivery fee of $30 has been added to your cart.' : ''; ?>
-                        </td>
-                    </tr>
 					<?php
 				}
 			}
