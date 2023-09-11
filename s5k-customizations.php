@@ -7,7 +7,7 @@
  * Author:          w33zy
  * Author URI:      https://wzymedia.com
  * Text Domain:     wzy-media
- * Version:         1.9.1
+ * Version:         1.10.0
  *
  * @package         S5K_Customizations
  */
@@ -131,6 +131,7 @@ class S5K_Customizations {
 		// add_action( 'wp_ajax_fetch_product_variations_stock', [ __CLASS__, 'fetch_product_variations_stock' ] );
 
 		add_action( 'woocommerce_cart_contents', [ __CLASS__, 'add_tt_post_message' ] );
+		add_action( 'woocommerce_review_order_after_cart_contents', [ __CLASS__, 'add_tt_post_message' ] );
 	}
 
 	public static function enqueue_scripts(): void {
@@ -166,7 +167,7 @@ class S5K_Customizations {
 
 		?>
         <tr class="woocommerce-cart-form__cart-item cart_item s5k-tt-post" style="background: #fff;">
-            <td colspan="2" class="tt-post"></td>
+            <?php echo is_page( 'cart' ) ? '<td colspan="2" class="tt-post"></td>' : ''; ?>
             <td colspan="2" class="tt-post" style="color:#EC111A; font-family:'ScotiaBold',Helvetica,Arial,sans-serif; font-size:20px;">
 				<?php echo $tt_post ? esc_html( 'A TTPost delivery fee of $30 has been added to your cart.' ) : ''; ?>
             </td>
