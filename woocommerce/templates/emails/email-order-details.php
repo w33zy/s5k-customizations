@@ -91,7 +91,7 @@ if ( 'cheque' !== $order->get_payment_method()
      && ! empty( S5K_Customizations::get_field_from_order( $order, 'name_of_company' )[0] )
      && in_array( 'group-registration', S5K_Customizations::flatten_array( $product_terms ), true ) ) {
 
-	echo '<p class="s5k-collection-location">' . esc_html( sprintf( 'Collection 30-Sept-2023 at %1$s from 10AM to 4PM', S5K_Customizations::get_field_from_order( $order, 'collection_location' )[0] ) ) . '</p>';
+	echo '<p class="s5k-collection-location">' . esc_html( sprintf( 'Collection 30-Sept-2023 at %1$s from 10AM to 4PM', S5K_Customizations::get_field_from_order( $order, 'collection_location' )[0] ?? '' ) ) . '</p>';
 
 	echo '<p class="s5k-collection-note" style="font-weight: bold">Note: you will need to present this email confirmation, along with a valid photo ID when collecting.</p>';
 }

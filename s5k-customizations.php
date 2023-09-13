@@ -7,7 +7,7 @@
  * Author:          w33zy
  * Author URI:      https://wzymedia.com
  * Text Domain:     wzy-media
- * Version:         1.11.2
+ * Version:         1.12.0
  *
  * @package         S5K_Customizations
  */
@@ -119,7 +119,11 @@ class S5K_Customizations {
 		add_action( 'woocommerce_checkout_order_created', [ __CLASS__, 'update_ticket_count' ], 99 );
 
 		// Decrease the stock count for the selected t-shirt size and design
-		add_action( 'woocommerce_checkout_order_created', [ __CLASS__, 'update_tshirt_count' ], 100 );
+		add_action( 'woocommerce_checkout_order_created', [ __CLASS__, 'decrement_tshirt_count' ], 100 );
+
+		// Increase the stock count for the selected t-shirt size and design
+		add_action( 'woocommerce_order_status_failed', [ __CLASS__, 'increment_tshirt_count' ], 100 );
+		add_action( 'woocommerce_order_status_cancelled', [ __CLASS__, 'increment_tshirt_count' ], 100 );
 
 		// Update the registration code
 		add_action( 'woocommerce_checkout_order_created', [ __CLASS__, 'assign_registration_code' ], 99 );
@@ -353,7 +357,7 @@ class S5K_Customizations {
 	 *
 	 * @return void
 	 */
-	public static function update_tshirt_count( \WC_Order $order ): void {
+	public static function decrement_tshirt_count( \WC_Order $order ): void {
 		$sizes    = self::get_field_from_order( $order, 'tshirtsize' );
 		$designs  = self::get_field_from_order( $order, 'shirtdesign' );
 		$combined = self::combine_arrays_to_associative( $sizes, $designs );
@@ -372,6 +376,35 @@ class S5K_Customizations {
 
 		error_log( '---------------------------------' );
 	}
+
+	/**
+     * Increase the stock count for the selected t-shirt size and design
+     * for failed and cancelled orders
+     *
+	 * @param  int  $order_id
+	 *
+	 * @return void
+	 */
+	public static function increment_tshirt_count( int $order_id ): void {
+        $order    = wc_get_order( $order_id );
+		$sizes    = self::get_field_from_order( $order, 'tshirtsize' );
+		$designs  = self::get_field_from_order( $order, 'shirtdesign' );
+		$combined = self::combine_arrays_to_associative( $sizes, $designs );
+
+		error_log( '---------------------------------' );
+		error_log( sprintf( 'Order #%1$d failed', $order->get_id() ) );
+
+		foreach ( self::$variation_matrix as $key => $value ) {
+			foreach ( $combined as $selection ) {
+				if ( serialize( $value ) === serialize( $selection ) ) {
+					$result = wc_update_product_stock( $key, 1, 'increase' );
+					error_log( sprintf( 'Inventory increased for variation #%1$d, stock is now at %2$d', $key, $result ) );
+				}
+			}
+		}
+
+		error_log( '---------------------------------' );
+    }
 
 	/**
 	 * Remove the state and postcode fields from the checkout form
