@@ -7,7 +7,7 @@
  * Author:          w33zy
  * Author URI:      https://wzymedia.com
  * Text Domain:     wzy-media
- * Version:         1.11.1
+ * Version:         1.11.2
  *
  * @package         S5K_Customizations
  */
@@ -358,7 +358,7 @@ class S5K_Customizations {
 		$designs  = self::get_field_from_order( $order, 'shirtdesign' );
 		$combined = self::combine_arrays_to_associative( $sizes, $designs );
 
-        error_log( '-------------------------------------' );
+        error_log( '---------------------------------' );
         error_log( sprintf( 'Order #%1$d received', $order->get_id() ) );
 
 		foreach ( self::$variation_matrix as $key => $value ) {
@@ -370,7 +370,7 @@ class S5K_Customizations {
 			}
 		}
 
-		error_log( '-------------------------------------' );
+		error_log( '---------------------------------' );
 	}
 
 	/**
@@ -436,10 +436,13 @@ class S5K_Customizations {
 		foreach ( $order->get_items() as $item_id => $item ) {
 			if ( has_term( $categories, 'product_cat', $item->get_product_id() ) ) {
 				$reg_code = self::get_next_available_registration_code();
-				update_post_meta( $order->get_id(), '_registration_code', $reg_code );
 
-				$new_codes = self::update_registration_codes( $reg_code, $order->get_id() );
-				update_option( '_s5k_registration_codes', $new_codes );
+                if ( $reg_code ) {
+	                update_post_meta( $order->get_id(), '_registration_code', $reg_code );
+
+	                $new_codes = self::update_registration_codes( $reg_code, $order->get_id() );
+	                update_option( '_s5k_registration_codes', $new_codes );
+                }
 			}
 		}
 	}

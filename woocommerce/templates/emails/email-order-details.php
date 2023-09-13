@@ -44,7 +44,7 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 <?php elseif ( 'cheque' !== $order->get_payment_method() && in_array( 'group-registration', S5K_Customizations::flatten_array( $product_terms ), true ) ) : ?>
     <h2 class="s5k-email-header">
 		<?php
-		$team_name = S5K_Customizations::get_field_from_order( $order, 'name_of_company' )[0];
+		$team_name = S5K_Customizations::get_field_from_order( $order, 'name_of_company' )[0] ?? '';
 		$reg_code = get_post_meta( $order->get_id(), '_registration_code', true );
 		echo sprintf( 'Order #%1$s | %2$s', $order->get_order_number(), $team_name );
 		?>
