@@ -7,7 +7,7 @@
  * Author:          w33zy
  * Author URI:      https://wzymedia.com
  * Text Domain:     wzy-media
- * Version:         1.10.0
+ * Version:         1.11.0
  *
  * @package         S5K_Customizations
  */
@@ -31,8 +31,8 @@ class S5K_Customizations {
 	];
 
 	public static array $variation_matrix = [
-		218 => [ 'XXL', 'White Unisex "For My" T-shirt' ],
-		219 => [ 'XXL', 'White Unisex Multicolour Print T-shirt' ],
+		218 => [ 'XXXL', 'White Unisex "For My" T-shirt' ],
+		219 => [ 'XXXL', 'White Unisex Multicolour Print T-shirt' ],
 
 		220 => [ 'XS', 'White Unisex "For My" T-shirt' ],
 		221 => [ 'XS', 'White Unisex Multicolour Print T-shirt' ],
@@ -116,10 +116,10 @@ class S5K_Customizations {
 		add_action( 'woocommerce_before_add_to_cart_button', [ __CLASS__, 'insert_ticket_count' ], 99 );
 
 		// Decrease the number of tickets available
-		add_action( 'woocommerce_checkout_create_order', [ __CLASS__, 'update_ticket_count' ], 99, 2 );
+		add_action( 'woocommerce_checkout_order_created', [ __CLASS__, 'update_ticket_count' ], 99 );
 
 		// Decrease the stock count for the selected t-shirt size and design
-		add_action( 'woocommerce_checkout_create_order', [ __CLASS__, 'update_tshirt_count' ], 100, 2 );
+		add_action( 'woocommerce_checkout_order_created', [ __CLASS__, 'update_tshirt_count' ], 100 );
 
 		// Update the registration code
 		add_action( 'woocommerce_checkout_order_created', [ __CLASS__, 'assign_registration_code' ], 99 );
@@ -290,13 +290,12 @@ class S5K_Customizations {
 	 * Update the number of tickets available
 	 *
 	 * @param  \WC_Order  $order  The order object
-	 * @param  array      $data   The data from the checkout form
 	 *
 	 * @throws \Exception
 	 *
 	 * @return void
 	 */
-	public static function update_ticket_count( \WC_Order $order, array $data ): void {
+	public static function update_ticket_count( \WC_Order $order ): void {
 		$counts = array_count_values( self::get_field_from_order( $order, 'gender' ) );
 		$count  = $counts['Male'] ?? 0;
 
@@ -339,11 +338,10 @@ class S5K_Customizations {
 	 * Decrease the stock count for the selected t-shirt size and design
 	 *
 	 * @param  \WC_Order  $order
-	 * @param  array      $data
 	 *
 	 * @return void
 	 */
-	public static function update_tshirt_count( \WC_Order $order, array $data ): void {
+	public static function update_tshirt_count( \WC_Order $order ): void {
 		$sizes    = self::get_field_from_order( $order, 'tshirtsize' );
 		$designs  = self::get_field_from_order( $order, 'shirtdesign' );
 		$combined = self::combine_arrays_to_associative( $sizes, $designs );
