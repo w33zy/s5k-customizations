@@ -7,7 +7,7 @@
  * Author:          w33zy
  * Author URI:      https://wzymedia.com
  * Text Domain:     wzy-media
- * Version:         1.11.0
+ * Version:         1.11.1
  *
  * @package         S5K_Customizations
  */
@@ -156,12 +156,14 @@ class S5K_Customizations {
 
 		if ( ! empty( WC()->cart ) && WC()->cart->get_cart_contents_count() > 0 ) {
 			foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-				foreach ( $cart_item['rn_line_items'] as $line_item ) {
-					if ( 'Street name' === $line_item->Label && ! empty( $line_item->Value ) ) {
-						$tt_post = true;
-						break;
-					}
-				}
+                if ( ! empty( $cart_item['rn_line_items'] ) ) {
+                    foreach ( $cart_item['rn_line_items'] as $line_item ) {
+                        if ( 'Street name' === $line_item->Label && ! empty( $line_item->Value ) ) {
+                            $tt_post = true;
+                            break;
+                        }
+                    }
+                }
 			}
 		}
 
@@ -235,6 +237,9 @@ class S5K_Customizations {
               form.addEventListener('submit', function (e) {
                 let smt = 0
                 const selectFields = form.querySelectorAll('select')
+                const divElement = document.querySelector('.s5k-ticket-exceeded')
+
+                divElement.innerHTML = ''
 
                 selectFields.forEach(function (select) {
                   const selectedText = select.options[select.selectedIndex]?.text
@@ -253,18 +258,18 @@ class S5K_Customizations {
                   let p = document.createElement('p')
                   p.style.padding = 0
 
-                  let divElement = document.querySelector('.s5k-ticket-exceeded')
                   divElement.style.padding = '1rem'
                   divElement.style.border = '2px solid #E33B31'
                   divElement.style.borderRadius = '4px'
                   divElement.style.backgroundColor = '#ff00001a'
                   divElement.style.margin = '1rem 0'
 
-                  p.textContent = `Male tickets quota has been exceeded. You have selected ${smt} tickets but only ${mta} are available.`
+                  p.textContent = `Male tickets quota has been exceeded. You have selected ${smt} ticket(s) but only ${mta} are available.`
                   divElement.appendChild(p)
                 }
               })
             }
+
           })
         </script>
 		<?php
@@ -330,7 +335,14 @@ class S5K_Customizations {
 				);
 			}
 
-			update_option( '_s5k_male_tickets_available', ( $current - $count ) );
+			$updated = update_option( '_s5k_male_tickets_available', ( $current - $count ) );
+
+			error_log( '+++++++++++++++++++++++++++++++++' );
+			error_log( sprintf( 'Order #%1$d received', $order->get_id() ) );
+            if ( $updated ) {
+	            error_log( sprintf( 'Male tickets count reduced by %1$d, the current ticket count is %2$d', $count, ( $current - $count ) ) );
+            }
+			error_log( '+++++++++++++++++++++++++++++++++' );
 		}
 	}
 
@@ -346,13 +358,19 @@ class S5K_Customizations {
 		$designs  = self::get_field_from_order( $order, 'shirtdesign' );
 		$combined = self::combine_arrays_to_associative( $sizes, $designs );
 
+        error_log( '-------------------------------------' );
+        error_log( sprintf( 'Order #%1$d received', $order->get_id() ) );
+
 		foreach ( self::$variation_matrix as $key => $value ) {
 			foreach ( $combined as $selection ) {
 				if ( serialize( $value ) === serialize( $selection ) ) {
-					wc_update_product_stock( $key, 1, 'decrease' );
+					$result = wc_update_product_stock( $key, 1, 'decrease' );
+					error_log( sprintf( 'Inventory decreased for variation #%1$d, stock is now at %2$d', $key, $result ) );
 				}
 			}
 		}
+
+		error_log( '-------------------------------------' );
 	}
 
 	/**
