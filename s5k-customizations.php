@@ -7,7 +7,7 @@
  * Author:          w33zy
  * Author URI:      https://wzymedia.com
  * Text Domain:     wzy-media
- * Version:         1.13.0
+ * Version:         1.13.1
  *
  * @package         S5K_Customizations
  */
@@ -147,7 +147,7 @@ class S5K_Customizations {
 		];
 
 		if ( is_singular( 'product' ) ) {
-			wp_enqueue_script( 's5k-customizations', plugin_dir_url( __FILE__ ) . 'assets/js/s5k-customizations3.js', [ 'jquery' ], '1.0.0', true );
+			wp_enqueue_script( 's5k-customizations', plugin_dir_url( __FILE__ ) . 'assets/js/s5k-customizations3.js', [ 'jquery' ], '1.13.1', true );
 			wp_add_inline_script(
 				's5k-customizations',
 				'window.s5k = window.s5k || {}; s5k.wpData = ' . wp_json_encode( $data )

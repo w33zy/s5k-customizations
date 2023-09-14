@@ -114,7 +114,11 @@ function getUserSelections(nodeList) {
 
       if ('' !== selectField.options[selectField.selectedIndex].value) {
         let selectedText = selectField.options[selectField.selectedIndex]?.text;
-        if (!selectedText.includes('Male') && !selectedText.includes('Female')) {
+        if (!selectedText.includes('Male')
+          && !selectedText.includes('Female')
+          && !selectedText.includes('Gulf City Mall')
+          && !selectedText.includes('Queen’s Park Oval Ballroom')
+        ) {
 
           if (selectedOptions.has(repeaterIndex)) {
             selectedOptions.get(repeaterIndex).add(selectedText);
