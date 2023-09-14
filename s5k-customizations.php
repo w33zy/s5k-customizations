@@ -7,7 +7,7 @@
  * Author:          w33zy
  * Author URI:      https://wzymedia.com
  * Text Domain:     wzy-media
- * Version:         1.13.1
+ * Version:         1.14.0
  *
  * @package         S5K_Customizations
  */
@@ -123,7 +123,8 @@ class S5K_Customizations {
 
 		// Increase the stock count for the selected t-shirt size and design
 		add_action( 'woocommerce_order_status_failed', [ __CLASS__, 'increment_tshirt_count' ], 100 );
-		add_action( 'woocommerce_order_status_cancelled', [ __CLASS__, 'increment_tshirt_count' ], 100 );
+		add_action( 'woocommerce_order_status_cancelled', [ __CLASS__, 'increment_tshirt_count' ], 101 );
+		add_action( 'woocommerce_order_status_refunded', [ __CLASS__, 'increment_tshirt_count' ], 102 );
 
 		// Update the registration code
 		add_action( 'woocommerce_checkout_order_created', [ __CLASS__, 'assign_registration_code' ], 99 );
@@ -147,7 +148,7 @@ class S5K_Customizations {
 		];
 
 		if ( is_singular( 'product' ) ) {
-			wp_enqueue_script( 's5k-customizations', plugin_dir_url( __FILE__ ) . 'assets/js/s5k-customizations3.js', [ 'jquery' ], '1.13.1', true );
+			wp_enqueue_script( 's5k-customizations', plugin_dir_url( __FILE__ ) . 'assets/js/s5k-customizations3.js', [ 'jquery' ], '1.14.0', true );
 			wp_add_inline_script(
 				's5k-customizations',
 				'window.s5k = window.s5k || {}; s5k.wpData = ' . wp_json_encode( $data )
