@@ -107,7 +107,7 @@ function getUserSelections(nodeList) {
 
   for (const repeater of nodeList) {
 
-    const repeaterIndex = parseInt(repeater.dataset.index);
+    const repeaterIndex = parseInt(repeater.dataset.index) || 0;
     const selectFields = repeater.querySelectorAll('select');
 
     for (const selectField of selectFields) {
@@ -190,7 +190,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelector('form.cart').addEventListener('submit', function(e) {
 
       let stockExceeded = [];
-      const repeaters = document.querySelectorAll('.rnRepeaterItem');
+      let repeaters = document.querySelectorAll('.rnRepeaterItem');
+      if (repeaters.length === 0) {
+        repeaters = document.querySelectorAll('.rednaoExtraProductForm');
+      }
+
       const variationsStock = window?.s5k?.wpData?.variationsStock;
 
       selectedOptions = getUserSelections(repeaters);
@@ -206,7 +210,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
           if (repeater) {
             const selectFields = repeater.querySelectorAll('select');
-            console.log('selectFields: ', selectFields);
             let count = 0;
             for (const selectField of selectFields) {
               count++;
@@ -232,7 +235,6 @@ document.addEventListener('DOMContentLoaded', function() {
           repeater.style.padding = '0px';
         }
       }
-
     });
 
   }

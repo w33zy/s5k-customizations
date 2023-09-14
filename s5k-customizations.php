@@ -7,7 +7,7 @@
  * Author:          w33zy
  * Author URI:      https://wzymedia.com
  * Text Domain:     wzy-media
- * Version:         1.12.0
+ * Version:         1.13.0
  *
  * @package         S5K_Customizations
  */
