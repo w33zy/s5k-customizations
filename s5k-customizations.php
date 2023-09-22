@@ -7,7 +7,7 @@
  * Author:          w33zy
  * Author URI:      https://wzymedia.com
  * Text Domain:     wzy-media
- * Version:         1.14.0
+ * Version:         1.15.0
  *
  * @package         S5K_Customizations
  */
@@ -356,12 +356,26 @@ class S5K_Customizations {
 	 *
 	 * @param  \WC_Order  $order
 	 *
+	 * @throws \Exception
+     *
 	 * @return void
 	 */
 	public static function decrement_tshirt_count( \WC_Order $order ): void {
 		$sizes    = self::get_field_from_order( $order, 'tshirtsize' );
 		$designs  = self::get_field_from_order( $order, 'shirtdesign' );
 		$combined = self::combine_arrays_to_associative( $sizes, $designs );
+		$stock    = self::get_product_variations_stock( 155 );
+
+		foreach( $combined as $size_tshirt ) {
+			$slug = self::convert_to_slug( implode( '-', $size_tshirt ) );
+			if ( $stock[ $slug ] <= 0 ) {
+				error_log( '*********************************' );
+				error_log( sprintf( 'Order #%1$d threw an error', $order->get_id() ) );
+				error_log( sprintf( '%1$s is not available for purchase', self::$variation_names[ $slug ] ) );
+				error_log( '*********************************' );
+                throw new \Exception( sprintf( 'There are no more \'%1$s\' available', self::$variation_names[ $slug ] ) );
+            }
+		}
 
         error_log( '---------------------------------' );
         error_log( sprintf( 'Order #%1$d received', $order->get_id() ) );
@@ -792,6 +806,11 @@ class S5K_Customizations {
 		}
 
 		return $result;
+	}
+
+	public static function convert_to_slug( $string ) {
+
+		return preg_replace( '/[^a-zA-Z0-9\-]/', '', str_replace( ' ', '-', strtolower( $string ) ) );
 	}
 }
 
