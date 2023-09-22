@@ -7,7 +7,7 @@
  * Author:          w33zy
  * Author URI:      https://wzymedia.com
  * Text Domain:     wzy-media
- * Version:         1.15.0
+ * Version:         1.16.0
  *
  * @package         S5K_Customizations
  */
@@ -117,6 +117,10 @@ class S5K_Customizations {
 
 		// Decrease the number of tickets available
 		add_action( 'woocommerce_checkout_order_created', [ __CLASS__, 'update_ticket_count' ], 99 );
+		add_action( 's5k_order_failed', [ __CLASS__, 'adjust_ticket_count' ], 99 );
+		add_action( 'woocommerce_order_status_failed', [ __CLASS__, 'adjust_ticket_count' ], 106 );
+		add_action( 'woocommerce_order_status_cancelled', [ __CLASS__, 'adjust_ticket_count' ], 107 );
+		add_action( 'woocommerce_order_status_refunded', [ __CLASS__, 'adjust_ticket_count' ], 108 );
 
 		// Decrease the stock count for the selected t-shirt size and design
 		add_action( 'woocommerce_checkout_order_created', [ __CLASS__, 'decrement_tshirt_count' ], 100 );
@@ -351,6 +355,24 @@ class S5K_Customizations {
 		}
 	}
 
+	public static function adjust_ticket_count( \WC_Order $order ): void {
+		$counts = array_count_values( self::get_field_from_order( $order, 'gender' ) );
+		$count  = $counts['Male'] ?? 0;
+
+		if ( $count ) {
+			$current = get_option( '_s5k_male_tickets_available' );
+
+    		$updated = update_option( '_s5k_male_tickets_available', ( $current + $count ) );
+
+			error_log( '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^' );
+			error_log( sprintf( 'Order #%1$d failed', $order->get_id() ) );
+			if ( $updated ) {
+				error_log( sprintf( 'Male tickets count increased by %1$d, the current ticket count is %2$d', $count, ( $current + $count ) ) );
+			}
+			error_log( '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^' );
+		}
+    }
+
 	/**
 	 * Decrease the stock count for the selected t-shirt size and design
 	 *
@@ -368,12 +390,15 @@ class S5K_Customizations {
 
 		foreach( $combined as $size_tshirt ) {
 			$slug = self::convert_to_slug( implode( '-', $size_tshirt ) );
-			if ( $stock[ $slug ] <= 0 ) {
+            $order_count = self::count_order_variations( $combined )[ $slug ];
+
+			if ( $stock[ $slug ] <= 0 || $order_count > $stock[ $slug ] ) {
 				error_log( '*********************************' );
 				error_log( sprintf( 'Order #%1$d threw an error', $order->get_id() ) );
-				error_log( sprintf( '%1$s is not available for purchase', self::$variation_names[ $slug ] ) );
+				error_log( sprintf( '%1$s is not available for purchase. Order: %2$d. Stock: %3$d', self::$variation_names[ $slug ], $order_count, $stock[ $slug ] ) );
 				error_log( '*********************************' );
-                throw new \Exception( sprintf( 'There are no more \'%1$s\' available', self::$variation_names[ $slug ] ) );
+                do_action( 's5k_order_failed', $order, $order_count, $stock[ $slug ] );
+                throw new \Exception( sprintf( 'We only have %3$d \'%1$s\' in stock but you are trying to order %2$d.', self::$variation_names[ $slug ], $order_count, $stock[ $slug ] ) );
             }
 		}
 
@@ -703,6 +728,22 @@ class S5K_Customizations {
 		}
 
 		return $result;
+	}
+
+	private static function count_order_variations( array $order ): array {
+		$data   = [];
+		$output = [];
+
+		foreach( $order as $variation ) {
+			$slug = self::convert_to_slug( implode( '-', $variation ) );
+			$data[ $slug ][] = $slug;
+		}
+
+		foreach( $data as $key => $value ) {
+			$output[ $key ] = count( $value );
+		}
+
+		return $output;
 	}
 
 	private static function extract_string_value( $data ): ?string {
