@@ -7,7 +7,7 @@
  * Author:          w33zy
  * Author URI:      https://wzymedia.com
  * Text Domain:     wzy-media
- * Version:         1.16.0
+ * Version:         1.16.1
  *
  * @package         S5K_Customizations
  */
@@ -355,7 +355,8 @@ class S5K_Customizations {
 		}
 	}
 
-	public static function adjust_ticket_count( \WC_Order $order ): void {
+	public static function adjust_ticket_count( $order ): void {
+        $order  = $order instanceof WC_Order ? $order : wc_get_order( $order );
 		$counts = array_count_values( self::get_field_from_order( $order, 'gender' ) );
 		$count  = $counts['Male'] ?? 0;
 
