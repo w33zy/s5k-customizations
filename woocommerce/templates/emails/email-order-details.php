@@ -61,15 +61,21 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 
 
 // Individual registration confirmation EMAIL (Delivery)
-if ( ! empty( S5K_Customizations::get_field_from_order( $order, 'delivery_streetname' )[0] )
-     && in_array( 'individual-registration', S5K_Customizations::flatten_array( $product_terms ), true ) ) {
+if (
+     ! $sent_to_admin
+     && ! empty( S5K_Customizations::get_field_from_order( $order, 'delivery_streetname' )[0] )
+     && in_array( 'individual-registration', S5K_Customizations::flatten_array( $product_terms ), true )
+) {
 
     echo '<p class="s5k-delivery-note">' . esc_html( 'You’ve selected the delivery option. Your package will arrive at the address below between 27-Sept-2023 and 4-Oct-2023.' ) . '</p>';
 }
 
 // Individual registration or merch order confirmation EMAIL (Collection)
-if ( ! empty( S5K_Customizations::get_field_from_order( $order, 'collection_location' )[0] )
-     && in_array( 'individual-registration', S5K_Customizations::flatten_array( $product_terms ), true ) ) {
+if (
+     ! $sent_to_admin
+     && ! empty( S5K_Customizations::get_field_from_order( $order, 'collection_location' )[0] )
+     && in_array( 'individual-registration', S5K_Customizations::flatten_array( $product_terms ), true )
+) {
 
 	echo '<p class="s5k-delivery-note">' . esc_html( sprintf( 'Collection 30-Sept-2023 at %1$s from 10AM to 4PM', S5K_Customizations::get_field_from_order( $order, 'collection_location' )[0] )  ) . '</p>';
 
@@ -77,8 +83,10 @@ if ( ! empty( S5K_Customizations::get_field_from_order( $order, 'collection_loca
 }
 
 // Group registration or merch order confirmation EMAIL (other payment method/cheque)
-if ( 'cheque' === $order->get_payment_method()
-     && in_array( 'group-registration', S5K_Customizations::flatten_array( $product_terms ), true ) ) {
+if (
+     ! $sent_to_admin && 'cheque' === $order->get_payment_method()
+     && in_array( 'group-registration', S5K_Customizations::flatten_array( $product_terms ), true )
+) {
 
     echo '<p class="s5k-collection-message">Our team will contact you within 48 hours to facilitate payment. Once your payment is received, your registration will be processed</p>';
 
@@ -87,9 +95,11 @@ if ( 'cheque' === $order->get_payment_method()
     echo '<p class="s5k-collection-note" style="font-weight: bold">Note: you will need to present this email confirmation, along with a valid photo ID when collecting.</p>';
 }
 
-if ( 'cheque' !== $order->get_payment_method()
+if (
+     ! $sent_to_admin && 'cheque' !== $order->get_payment_method()
      && ! empty( S5K_Customizations::get_field_from_order( $order, 'name_of_company' )[0] )
-     && in_array( 'group-registration', S5K_Customizations::flatten_array( $product_terms ), true ) ) {
+     && in_array( 'group-registration', S5K_Customizations::flatten_array( $product_terms ), true )
+) {
 
 	echo '<p class="s5k-collection-location">' . esc_html( sprintf( 'Collection 30-Sept-2023 at %1$s from 10AM to 4PM', S5K_Customizations::get_field_from_order( $order, 'collection_location' )[0] ?? '' ) ) . '</p>';
 
