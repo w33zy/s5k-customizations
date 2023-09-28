@@ -7,7 +7,7 @@
  * Author:          w33zy
  * Author URI:      https://wzymedia.com
  * Text Domain:     wzy-media
- * Version:         1.18.0
+ * Version:         1.18.1
  *
  * @package         S5K_Customizations
  */
@@ -966,7 +966,7 @@ class S5K_Customizations {
 		}
 
 		foreach( $order->get_coupon_codes() as $coupon ) {
-			if ( in_array( substr( 'PLAT001', 0, 4 ), $coupon_prefixes, true ) ) {
+			if ( in_array( substr( $coupon, 0, 4 ), $coupon_prefixes, true ) ) {
 				return true;
 			}
 		}
