@@ -57,6 +57,10 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
     </h2>
 <?php endif; ?>
 
+<?php if ( S5K_Customizations::sponsor_coupon_in_order( $order ) ) : ?>
+    <p><strong><?php echo sprintf( 'Sponsor code: %1$s', implode( ', ', $order->get_coupon_codes() ) ); ?></strong></p>
+<?php endif; ?>
+
 <?php
 
 

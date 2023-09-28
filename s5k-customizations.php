@@ -7,7 +7,7 @@
  * Author:          w33zy
  * Author URI:      https://wzymedia.com
  * Text Domain:     wzy-media
- * Version:         1.17.0
+ * Version:         1.18.0
  *
  * @package         S5K_Customizations
  */
@@ -102,10 +102,14 @@ class S5K_Customizations {
 		add_filter( 'template_include', [ __CLASS__, 'include_template_name' ], 99 );
 		add_filter( 'wc_get_template_part', [ __CLASS__, 'get_template_part' ], 99, 3 );
 		add_filter( 'woocommerce_locate_template', [ __CLASS__, 'locate_template' ], 99, 2 );
+
+		add_filter( 'woocommerce_coupon_code', [ __CLASS__, 'uppercase_coupon_code' ], 9999 );
 	}
 
 
 	public static function add_actions(): void {
+		add_action( 'init', [ __CLASS__, 'custom_rewrite_rules' ] );
+		add_action( 'template_redirect', [ __CLASS__, 'auto_generate_coupon_from_url' ] );
 		add_action( 'wp_enqueue_scripts', [ __CLASS__, 'enqueue_scripts' ] );
 
 		// Insert a JS script on the single product page
@@ -159,6 +163,99 @@ class S5K_Customizations {
 			);
 		}
 	}
+
+	/**
+     * Create custom rewrite rule for the coupon generator
+     *
+     * @example /wp-admin/generate-coupon/?prefix=GOLD&start=1&stop=10
+     *
+	 * @return void
+	 */
+	public static function custom_rewrite_rules(): void {
+		if ( is_admin() ) {
+			add_rewrite_rule(
+                'wp-admin/generate-coupon/?$',
+                'index.php' . add_query_arg( [ 'prefix' => 'GOLD', 'start' => 1, 'stop' => 10 ], 'index.php' ),
+                'top'
+            );
+		}
+	}
+
+	/**
+	 * Automatically generate coupons from the URL parameters
+	 *
+	 * @throws \Exception
+     *
+	 * @return void
+	 */
+	public static function auto_generate_coupon_from_url(): void {
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            throw new \RuntimeException( 'Unable to perform action.' );
+        }
+
+		if (
+                ! empty( $_GET['prefix'] )
+                && ! empty( $_GET['start'] )
+                && ! empty( $_GET['stop'] )
+		) {
+
+			$coupon_prefix = in_array(  $_GET['prefix'], [ 'GOLD', 'PLAT' ], true ) ? sanitize_text_field( $_GET['prefix'] ) : null;
+			$coupon_start  = (int) $_GET['start'];
+			$coupon_stop   = (int) $_GET['stop'];
+
+            if ( ! $coupon_prefix || ! $coupon_start || ! $coupon_stop ) {
+                throw new \RuntimeException( 'Missing or invalid coupon values.' );
+            }
+
+			foreach ( range( $coupon_start, $coupon_stop ) as $digit ) {
+				$code   = $coupon_prefix . str_pad( $digit, 3, '0', STR_PAD_LEFT );
+
+                if ( wc_get_coupon_id_by_code( $code ) ) {
+                    continue;
+                }
+
+				$coupon = new WC_Coupon();
+
+				$coupon->set_code( $code );
+				$coupon->set_description( $coupon_prefix === 'GOLD' ? 'Gold sponsor coupon code' : 'Platinum sponsor coupon code' );
+				$coupon->set_date_expires( '06-10-2023' );
+				$coupon->set_discount_type( $coupon_prefix === 'GOLD' ? 'percent' : 'fixed_cart' );
+				$coupon->set_amount( $coupon_prefix === 'GOLD' ? 100 : 1300 );
+				$coupon->set_individual_use( true );
+				$coupon->set_product_ids( $coupon_prefix === 'GOLD' ? [ 130 ] : [ 134 ] );
+
+				if ( $coupon_prefix === 'GOLD' ) {
+					$coupon->set_usage_limit_per_user( 5 );
+				}
+
+				if ( $coupon_prefix === 'PLAT' ) {
+					$coupon->set_usage_limit( 1 );
+				}
+
+				$coupon->save();
+            }
+
+			wp_redirect( admin_url( 'edit.php?post_type=shop_coupon' ) );
+			exit;
+		}
+	}
+
+	/**
+     * Convert coupon code to uppercase
+     *
+	 * @param  string  $code
+	 *
+	 * @return string
+	 */
+	public static function uppercase_coupon_code( string $code ): string {
+        if ( strtolower( $code ) === $code ) {
+
+            return strtoupper( $code );
+        }
+
+        return $code;
+    }
 
 	public static function add_tt_post_message(): void {
 		$tt_post = false;
@@ -853,6 +950,28 @@ class S5K_Customizations {
 	public static function convert_to_slug( $string ) {
 
 		return preg_replace( '/[^a-zA-Z0-9\-]/', '', str_replace( ' ', '-', strtolower( $string ) ) );
+	}
+
+	/**
+     * Check if the order contains a sponsor coupon
+     *
+	 * @param  \WC_Order  $order
+	 * @param  array      $coupon_prefixes
+	 *
+	 * @return bool
+	 */
+	public static function sponsor_coupon_in_order( \WC_Order $order, array $coupon_prefixes = [ 'PLAT', 'GOLD' ] ): bool {
+		if ( empty( $order->get_coupon_codes() ) ) {
+			return false;
+		}
+
+		foreach( $order->get_coupon_codes() as $coupon ) {
+			if ( in_array( substr( 'PLAT001', 0, 4 ), $coupon_prefixes, true ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }
 
